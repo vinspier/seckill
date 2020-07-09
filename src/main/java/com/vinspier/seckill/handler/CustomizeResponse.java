@@ -1,6 +1,7 @@
 package com.vinspier.seckill.handler;
 
 import com.vinspier.seckill.enums.ResultCode;
+import com.vinspier.seckill.enums.SecKillState;
 
 /**
  * @ClassName: ResponseSuccessTemplate
@@ -48,12 +49,16 @@ public class CustomizeResponse<T> {
         return new CustomizeResponse(data,resultCode.getCode(),resultCode.getMsg(),true);
     }
 
-    public static CustomizeResponse failed(Object data){
-        return new CustomizeResponse(data,500,"操作失败",false);
+    public static CustomizeResponse ok(SecKillState secKillState){
+        return new CustomizeResponse(secKillState.getState(),secKillState.getMsg(),false);
     }
 
     public static CustomizeResponse failed(){
         return new CustomizeResponse(null,500,"操作失败",false);
+    }
+
+    public static CustomizeResponse failed(Object data){
+        return new CustomizeResponse(data,500,"操作失败",false);
     }
 
     public static CustomizeResponse failed(ResultCode resultCode){
@@ -62,6 +67,10 @@ public class CustomizeResponse<T> {
 
     public static CustomizeResponse failed(ResultCode resultCode, Object data){
         return new CustomizeResponse(data,resultCode.getCode(),resultCode.getMsg(),false);
+    }
+
+    public static CustomizeResponse failed(SecKillState secKillState){
+        return new CustomizeResponse(secKillState.getState(),secKillState.getMsg(),false);
     }
 
     public int getCode() {

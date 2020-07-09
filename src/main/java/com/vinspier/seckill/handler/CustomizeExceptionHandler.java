@@ -1,6 +1,7 @@
 package com.vinspier.seckill.handler;
 
 import com.alibaba.fastjson.JSONObject;
+import com.vinspier.seckill.enums.ResultCode;
 import com.vinspier.seckill.exception.CustomizeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ public class CustomizeExceptionHandler {
     @ResponseBody
     public String handleException(Exception e){
         logger.error(e.getMessage(),e);
-        return JSONObject.toJSONString(CustomizeResponse.failed(null));
+        return JSONObject.toJSONString(CustomizeResponse.failed(ResultCode.SERVER_UNKNOW_ERROR));
     }
 
     /**
