@@ -29,6 +29,8 @@ public class InitTask implements CommandLineRunner{
     private SecKillDao secKillDao;
     @Autowired
     private RedisTemplate<String,SecKill> seckillRedisTemplate;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 预热秒杀数据到Redis
@@ -41,8 +43,11 @@ public class InitTask implements CommandLineRunner{
         List<SecKill> secKills = secKillDao.selectAll();
         if (!CollectionUtils.isEmpty(secKills)){
             secKills.forEach(s -> {
+
                 // 如果未存在 则存入redis中
                 seckillRedisTemplate.opsForValue().setIfAbsent(PrefixKeyEnum.SEC_KILLED_GOODS.getPrefix() + s.getSeckillId().toString(),s);
+                redisTemplate.opsForValue().setIfAbsent(PrefixKeyEnum.SEC_KILLED_INVENTORY.getPrefix() + s.getSeckillId().toString(),s.getInventory());
+                redisTemplate.opsForSet().add(PrefixKeyEnum.SEC_KILLED_IDS.getPrefix(),s.getSeckillId());
             });
         }
         logger.info("<<<<<<<<<<<<<<<<<<<<<<<程序启动后，完成初始化任务>>>>>>>>>>>>>>>>>>>>>>>>");
