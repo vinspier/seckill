@@ -48,6 +48,13 @@ logging:
   file:
     path: /seckill_Log
 
+# 自定义参数
+
+customize:
+  # 暴露秒杀商品ID加密的 盐
+  exposedSalt: sdfgh%$%hr123thgj@#@@!WSDFD123
+  # 抢到秒杀商品 等待支付时间 单位ms
+  payedWaited: 900000
 
 
 

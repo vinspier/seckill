@@ -5,6 +5,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
 
+
+/**
+ * 定义全局的applicationContext对象
+ * */
 @Configuration
 public class ApplicationContextConfig implements ApplicationContextAware {
     //定义静态的ApplicationContext成员对象
