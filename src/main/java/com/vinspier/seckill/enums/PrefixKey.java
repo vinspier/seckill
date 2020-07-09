@@ -1,6 +1,6 @@
 package com.vinspier.seckill.enums;
 
-public enum  PrefixKeyEnum {
+public enum PrefixKey {
     SEC_KILLED_GOODS("SEC_KILLED_GOODS_"),
     SEC_KILLED_INVENTORY("SEC_KILLED_INVENTORY_"),
     SEC_KILLED_IDS("SEC_KILLED_IDS")
@@ -8,7 +8,7 @@ public enum  PrefixKeyEnum {
 
     private String prefix;
 
-    PrefixKeyEnum(String prefix) {
+    PrefixKey(String prefix) {
         this.prefix = prefix;
     }
 

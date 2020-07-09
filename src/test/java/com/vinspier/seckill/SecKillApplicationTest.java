@@ -1,9 +1,7 @@
 package com.vinspier.seckill;
 
-import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vinspier.seckill.entity.SecKill;
-import com.vinspier.seckill.enums.PrefixKeyEnum;
+import com.vinspier.seckill.enums.PrefixKey;
 import com.vinspier.seckill.service.SecKillService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,13 +32,13 @@ public class SecKillApplicationTest {
     public void initRedis(){
         SecKill secKill = secKillService.findById(1000L);
         if (secKill != null){
-            seckillRedisTemplate.opsForValue().set(PrefixKeyEnum.SEC_KILLED_GOODS.getPrefix() + secKill.getSeckillId(),secKill);
+            seckillRedisTemplate.opsForValue().set(PrefixKey.SEC_KILLED_GOODS.getPrefix() + secKill.getSeckillId(),secKill);
         }
     }
 
     @Test
     public void getFormRedis(){
-        SecKill secKill = seckillRedisTemplate.opsForValue().get(PrefixKeyEnum.SEC_KILLED_GOODS.getPrefix() + 1000L);
+        SecKill secKill = seckillRedisTemplate.opsForValue().get(PrefixKey.SEC_KILLED_GOODS.getPrefix() + 1000L);
         System.out.println(secKill.toString());
     }
 

@@ -2,7 +2,7 @@ package com.vinspier.seckill.task;
 
 import com.vinspier.seckill.dao.SecKillDao;
 import com.vinspier.seckill.entity.SecKill;
-import com.vinspier.seckill.enums.PrefixKeyEnum;
+import com.vinspier.seckill.enums.PrefixKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,9 +45,9 @@ public class InitTask implements CommandLineRunner{
             secKills.forEach(s -> {
 
                 // 如果未存在 则存入redis中
-                seckillRedisTemplate.opsForValue().setIfAbsent(PrefixKeyEnum.SEC_KILLED_GOODS.getPrefix() + s.getSeckillId().toString(),s);
-                redisTemplate.opsForValue().setIfAbsent(PrefixKeyEnum.SEC_KILLED_INVENTORY.getPrefix() + s.getSeckillId().toString(),s.getInventory());
-                redisTemplate.opsForSet().add(PrefixKeyEnum.SEC_KILLED_IDS.getPrefix(),s.getSeckillId());
+                seckillRedisTemplate.opsForValue().setIfAbsent(PrefixKey.SEC_KILLED_GOODS.getPrefix() + s.getSeckillId().toString(),s);
+                redisTemplate.opsForValue().setIfAbsent(PrefixKey.SEC_KILLED_INVENTORY.getPrefix() + s.getSeckillId().toString(),s.getInventory());
+                redisTemplate.opsForSet().add(PrefixKey.SEC_KILLED_IDS.getPrefix(),s.getSeckillId());
             });
         }
         logger.info("<<<<<<<<<<<<<<<<<<<<<<<程序启动后，完成初始化任务>>>>>>>>>>>>>>>>>>>>>>>>");
