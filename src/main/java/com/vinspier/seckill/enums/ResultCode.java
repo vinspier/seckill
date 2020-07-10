@@ -13,6 +13,7 @@ public enum ResultCode {
     SOLD_OUT(2, "已售罄"),
     SUCCESS(1, "恭喜你，抢到啦"),
     END(0, "活动已结束"),
+    UN_START(-6, "活动未开始"),
     REPEAT_KILL(-1, "每人只限一次抢购机会"),
     /** 运行时才能检测到的所有异常-系统异常 */
     INNER_ERROR(-2, "很遗憾没抢到"),

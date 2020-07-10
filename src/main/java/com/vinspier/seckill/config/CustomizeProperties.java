@@ -22,4 +22,7 @@ public class CustomizeProperties {
     /** google guava RateLimiter 每秒限流数 */
     private Double rateLimited;
 
+    /** 获取限流机会等待时间 单位ms */
+    private Long rateLimiterWait;
+
 }
