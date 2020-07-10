@@ -55,6 +55,8 @@ customize:
   exposedSalt: sdfgh%$%hr123thgj@#@@!WSDFD123
   # 抢到秒杀商品 等待支付时间 单位ms
   payedWaited: 900000
+  # 每秒限流数
+  rateLimited: 20
 
 
 

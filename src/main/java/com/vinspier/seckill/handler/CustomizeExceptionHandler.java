@@ -29,7 +29,7 @@ public class CustomizeExceptionHandler {
     @ResponseBody
     public String handleException(Exception e){
         logger.error(e.getMessage(),e);
-        return JSONObject.toJSONString(CustomizeResponse.failed(ResultCode.SERVER_UNKNOW_ERROR));
+        return JSONObject.toJSONString(CustomizeResponse.failed(ResultCode.SERVER_UNKNOWN_ERROR));
     }
 
     /**

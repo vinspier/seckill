@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 /**
  * 程序中需要的 自定义的配置参数
  * */
-@ConfigurationProperties(prefix = "customize.")
+@ConfigurationProperties(prefix = "customize")
 @Component
 @Data
 public class CustomizeProperties {
@@ -18,5 +18,8 @@ public class CustomizeProperties {
 
     /** 抢到秒杀商品 等待支付的最大时间 单位ms */
     private Long payedWaited;
+
+    /** google guava RateLimiter 每秒限流数 */
+    private Double rateLimited;
 
 }
