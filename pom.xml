@@ -90,7 +90,6 @@
             <version>27.0.1-jre</version>
         </dependency>
         <!-- AMQP -->
-<!--
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
@@ -101,7 +100,6 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.3.2</version>
         </dependency>
-        -->
 
         <!-- test -->
         <dependency>

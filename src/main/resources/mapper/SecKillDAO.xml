@@ -4,4 +4,15 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.vinspier.seckill.dao.SecKillDao">
 
+    <!-- 使用已知状态以及version 数据库的行锁 更新-->
+    <update id="reduceInventory">
+        update
+          sec_kill
+        set
+            inventory = inventory - 1,
+            version = #{newVersion}
+        where
+            seckill_id = #{secKillId} and version = #{oldVersion}
+    </update>
+
 </mapper>

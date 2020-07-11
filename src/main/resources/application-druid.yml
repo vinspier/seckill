@@ -26,7 +26,13 @@ spring:
           max-idle: 8
           min-idle: 0
           max-wait: -1
-
+  rabbitmq:
+    host: 127.0.0.1
+    virtual-host: /vinspier
+    username: vinspier
+    password: vinspier
+    template:
+        exchange: sec_kill # 缺省的交换机名称 发送消息如果不指定交换机就会使用这个
 
 mybatis:
   type-aliases-package: com.vinspier.seckill.entity
