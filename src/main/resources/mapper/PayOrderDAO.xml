@@ -4,4 +4,34 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.vinspier.seckill.dao.PayOrderDao">
 
+    <!-- 查询秒杀订单信息 携带商品信息 -->
+    <select id="findBySecKillIdWithSecKill" resultType="payOrder">
+        SELECT
+            po.seckill_id,
+            po.user_phone,
+            po.create_time,
+            po.state,
+            sk.seckill_id "seckill.seckill_id",
+            sk.name "seckill.name",
+            sk.inventory "seckill.inventory",
+            sk.start_time "seckill.start_time",
+            sk.end_time "seckill.end_time",
+            sk.create_time "seckill.create_time"
+        FROM
+            `pay_order` po INNER JOIN `sec_kill` sk ON po.seckill_id = sk.seckill_id
+        WHERE po.seckill_id = #{secKillId} AND po.user_phone = #{phone}
+    </select>
+
+    <!-- 通过状态查询订单信息 -->
+    <select id="findListByState" resultType="payOrder">
+        SELECT
+            po.seckill_id,
+            po.user_phone,
+            po.create_time,
+            po.state
+        FROM
+          `pay_order` po
+        WHERE po.state = #{state}
+    </select>
+
 </mapper>

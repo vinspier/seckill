@@ -39,8 +39,8 @@ public class SecKillListener {
     )
     public void grabListener(SecKillMsg secKillMsg){
         logger.info("user={} got an chance to buy secKill={} ",secKillMsg.getUserPhone(),secKillMsg.getSecKillId());
-        secKillService.doGrabInRedis(secKillMsg);
         // ToDo 发送ack确认消息被正确接受消费
+        secKillService.doGrabInRedis(secKillMsg);
     }
 
 }

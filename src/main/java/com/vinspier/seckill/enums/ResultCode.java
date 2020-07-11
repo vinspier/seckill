@@ -2,7 +2,7 @@ package com.vinspier.seckill.enums;
 
 public enum ResultCode {
 
-    /** 秒杀的状态 */
+    /** 秒杀过程的状态 */
     ENQUEUE_PRE_SECKILL(6, "排队中..."),
     /** 释放分布式锁失败，秒杀被淘汰*/
     DISTLOCK_RELEASE_FAILED(5, "很遗憾没抢到"),
@@ -22,7 +22,6 @@ public enum ResultCode {
     DB_CONCURRENCY_ERROR(-4, "很遗憾没抢到"),
     /** 被AccessLimitService限流了 */
     ACCESS_LIMIT(-5, "很遗憾没抢到"),
-
 
     /** 统一的操作流状态 */
     SERVER_SUCCESS(200,"操作成功"),

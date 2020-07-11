@@ -8,6 +8,7 @@ import com.vinspier.seckill.entity.SecKill;
 import com.vinspier.seckill.enums.PayOrderState;
 import com.vinspier.seckill.enums.PrefixKey;
 import com.vinspier.seckill.enums.ResultCode;
+import com.vinspier.seckill.enums.SecKillState;
 import com.vinspier.seckill.exception.CustomizeException;
 import com.vinspier.seckill.mq.RabbitKeys;
 import com.vinspier.seckill.mq.SecKillMsg;
@@ -101,13 +102,19 @@ public class SecKillServiceImpl implements SecKillService {
         // 判断是否在活动时间内
         SecKill secKill = seckillRedisTemplate.opsForValue().get(PrefixKey.SEC_KILLED_GOODS.getPrefix() + id);
         Date current = new Date();
-        if (!DateUtil.before(secKill.getStartTime(),current)){
+        if (DateUtil.before(secKill.getStartTime(),current)){
             logger.info("secKill activity is not being starting [ secKillId={},phone={} ] ",id,phone);
             return ResultCode.UN_START;
         }
-        if (!DateUtil.after(secKill.getEndTime(),current)){
+        if (DateUtil.after(secKill.getEndTime(),current)){
             logger.info("secKill activity had been stopped[ secKillId={},phone={} ] ",id,phone);
             return ResultCode.END;
+        }
+        // 以下这两步骤 保证了同一个用户 只会发送一条消息给MQ队列
+        // 判断是否重在排队中
+        if (redisTemplate.opsForSet().isMember(PrefixKey.SEC_KILLED_PRE_GRABS.getPrefix(),id + "@" + phone)){
+            logger.info("you got an chance and is on the queue[ secKillId={},phone={} ] ",id,phone);
+            return ResultCode.ENQUEUE_PRE_SECKILL;
         }
         // 判断是否重复秒杀
         if (redisTemplate.opsForSet().isMember(PrefixKey.SEC_KILLED_BOUGHT_USERS.getPrefix() + id,phone)){
@@ -162,10 +169,16 @@ public class SecKillServiceImpl implements SecKillService {
         // 判断是否在活动时间内
         SecKill secKill = seckillRedisTemplate.opsForValue().get(PrefixKey.SEC_KILLED_GOODS.getPrefix() + id);
         Date current = new Date();
-        if (!DateUtil.before(secKill.getStartTime(),current)){
+        if (DateUtil.before(secKill.getStartTime(),current)){
             logger.info("secKill activity is not being starting [ secKillId={},phone={} ] ",id,phone);
             throw new CustomizeException(ResultCode.UN_START);
         }
+        if (DateUtil.after(secKill.getEndTime(),current)){
+            logger.info("secKill activity had been stopped[ secKillId={},phone={} ] ",id,phone);
+            throw new CustomizeException(ResultCode.END);
+        }
+        // 模拟MQ消费出错 查看消息队列如何处理
+//        throw new CustomizeException(ResultCode.SERVER_UNKNOWN_ERROR);
         // 现在DB中产生数据
         secKillService.doModifySecKillInDB(id,phone);
         // 更新redis中的库存
@@ -184,11 +197,11 @@ public class SecKillServiceImpl implements SecKillService {
         }
         SecKill secKill = secKillDao.selectByPrimaryKey(id);
         Date current = new Date();
-        if (!DateUtil.before(secKill.getStartTime(),current)){
+        if (DateUtil.before(secKill.getStartTime(),current)){
             logger.info("secKill activity is not being starting [ secKillId={},phone={} ] ",id,phone);
             throw new CustomizeException(ResultCode.UN_START);
         }
-        if (!DateUtil.after(secKill.getEndTime(),current)){
+        if (DateUtil.after(secKill.getEndTime(),current)){
             logger.info("secKill activity had been stopped[ secKillId={},phone={} ] ",id,phone);
             throw new CustomizeException(ResultCode.END);
         }
@@ -198,11 +211,25 @@ public class SecKillServiceImpl implements SecKillService {
         }
     }
 
+    @Override
+    public SecKillState queryGrab(Long id, Long phone) {
+        if (redisTemplate.opsForSet().isMember(PrefixKey.SEC_KILLED_BOUGHT_USERS.getPrefix() + id,phone)){
+            return SecKillState.SUCCESS;
+        }else{
+            if (redisTemplate.opsForSet().isMember(PrefixKey.SEC_KILLED_PRE_GRABS,id + "@" + phone)){
+                return SecKillState.QUEUE;
+            }
+            return SecKillState.FAILED;
+        }
+
+    }
+
     /**
      * 封装查询出来的秒杀数据
      * */
     private Exposure fetchExposure(SecKill secKill){
         Exposure exposure = new Exposure();
+        exposure.setSeckillId(secKill.getSeckillId());
         exposure.setStart(secKill.getStartTime());
         exposure.setEnd(secKill.getEndTime());
         exposure.setNow(new Date());

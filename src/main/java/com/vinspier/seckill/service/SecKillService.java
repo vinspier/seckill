@@ -3,6 +3,7 @@ package com.vinspier.seckill.service;
 import com.vinspier.seckill.dto.Exposure;
 import com.vinspier.seckill.entity.SecKill;
 import com.vinspier.seckill.enums.ResultCode;
+import com.vinspier.seckill.enums.SecKillState;
 import com.vinspier.seckill.mq.SecKillMsg;
 
 public interface SecKillService {
@@ -20,4 +21,7 @@ public interface SecKillService {
 
     /** 插入抢购数据到DB中 并且更新秒杀商品信息 */
     void doModifySecKillInDB(Long id,Long phone);
+
+    /** 查询秒杀状态 */
+    SecKillState queryGrab(Long id, Long phone);
 }

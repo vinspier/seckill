@@ -33,4 +33,10 @@ public class DateUtil {
         return target.after(end);
     }
 
+    /** 判断是否过期 超过了允许的时间 */
+    public static boolean expired(Date create,long wait){
+        Date current = new Date();
+        return current.getTime() - create.getTime() > wait;
+    }
+
 }

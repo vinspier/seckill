@@ -42,4 +42,22 @@ public class SecKillApplicationTest {
         System.out.println(secKill.toString());
     }
 
+    @Test
+    public void exposed(){
+        logger.info("secKill exposed md5 = {}",secKillService.exposed(1000L).getMd5());
+    }
+
+    @Test
+    public void multiGrab(){
+        String md5 = "f6e12a983a64dd3365f966786a6d5b76";
+        long id = 1000;
+        new Thread(() -> {
+            grab(id,10086,md5);
+        });
+    }
+
+    @Test
+    public void grab(long id,long phone,String md5){
+        secKillService.grab(id,phone,md5);
+    }
 }

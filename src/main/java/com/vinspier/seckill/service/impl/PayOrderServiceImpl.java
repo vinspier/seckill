@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class PayOrderServiceImpl implements PayOrderService {
@@ -23,5 +24,15 @@ public class PayOrderServiceImpl implements PayOrderService {
         payOrder.setCreateTime(new Date());
         payOrder.setState(state);
         return payOrderDao.insert(payOrder);
+    }
+
+    @Override
+    public PayOrder findBySecKillIdWithSecKill(long secKillId, long phone) {
+        return payOrderDao.findBySecKillIdWithSecKill(secKillId,phone);
+    }
+
+    @Override
+    public List<PayOrder> findListByState(int state) {
+        return payOrderDao.findListByState(state);
     }
 }
