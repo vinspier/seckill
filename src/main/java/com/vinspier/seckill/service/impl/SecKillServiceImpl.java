@@ -1,5 +1,6 @@
 package com.vinspier.seckill.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.util.concurrent.RateLimiter;
 import com.vinspier.seckill.config.CustomizeProperties;
 import com.vinspier.seckill.dao.SecKillDao;
@@ -15,9 +16,11 @@ import com.vinspier.seckill.mq.SecKillMsg;
 import com.vinspier.seckill.service.PayOrderService;
 import com.vinspier.seckill.service.SecKillService;
 import com.vinspier.seckill.util.DateUtil;
-import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -98,7 +101,17 @@ public class SecKillServiceImpl implements SecKillService {
             logger.info("data has Tampered by invalidate user[ secKillId={},phone={} ] ",id,phone);
             return ResultCode.DATA_REWRITE;
         }
-
+        // 以下这两步骤 保证了同一个用户 只会发送一条消息给MQ队列
+        // 判断是否重复秒杀
+        if (redisTemplate.opsForSet().isMember(PrefixKey.SEC_KILLED_BOUGHT_USERS.getPrefix() + id,phone)){
+            logger.info("sorry,there is only once chance for every one[ secKillId={},phone={} ] ",id,phone);
+            return ResultCode.REPEAT_KILL;
+        }
+        // 判断是否重在排队中
+        if (redisTemplate.opsForSet().isMember(PrefixKey.SEC_KILLED_PRE_GRABS.getPrefix(),id + "@" + phone)){
+            logger.info("you got an chance and is on the queue[ secKillId={},phone={} ] ",id,phone);
+            return ResultCode.ENQUEUE_PRE_SECKILL;
+        }
         // 判断是否在活动时间内
         SecKill secKill = seckillRedisTemplate.opsForValue().get(PrefixKey.SEC_KILLED_GOODS.getPrefix() + id);
         Date current = new Date();
@@ -110,24 +123,13 @@ public class SecKillServiceImpl implements SecKillService {
             logger.info("secKill activity had been stopped[ secKillId={},phone={} ] ",id,phone);
             return ResultCode.END;
         }
-        // 以下这两步骤 保证了同一个用户 只会发送一条消息给MQ队列
-        // 判断是否重在排队中
-        if (redisTemplate.opsForSet().isMember(PrefixKey.SEC_KILLED_PRE_GRABS.getPrefix(),id + "@" + phone)){
-            logger.info("you got an chance and is on the queue[ secKillId={},phone={} ] ",id,phone);
-            return ResultCode.ENQUEUE_PRE_SECKILL;
-        }
-        // 判断是否重复秒杀
-        if (redisTemplate.opsForSet().isMember(PrefixKey.SEC_KILLED_BOUGHT_USERS.getPrefix() + id,phone)){
-            logger.info("sorry,there is only once chance for every one[ secKillId={},phone={} ] ",id,phone);
-            return ResultCode.REPEAT_KILL;
-        }
         // 验证redis中的库存是否为0
         Integer inventory = (Integer)redisTemplate.opsForValue().get(PrefixKey.SEC_KILLED_INVENTORY.getPrefix() + id);
         if (inventory.compareTo(0) <= 0){
             logger.info("sorry secKill product has sold out[ secKillId={},phone={} ] ",id,phone);
             return ResultCode.SOLD_OUT;
         }
-        return executeGrabAsync(id,phone);
+        return secKillService.executeGrabAsync(id,phone);
     }
 
     /**
@@ -135,12 +137,19 @@ public class SecKillServiceImpl implements SecKillService {
      * 发送消息给MQ 处理redis中库存数据
      *
      * */
-    private ResultCode executeGrabAsync(Long id, Long phone){
+    @Transactional
+    public ResultCode executeGrabAsync(Long id, Long phone){
         SecKillMsg secKillMsg = new SecKillMsg();
         secKillMsg.setSecKillId(id);
         secKillMsg.setUserPhone(phone);
-        rabbitTemplate.convertAndSend(RabbitKeys.EXCHANGE_NAME,RabbitKeys.GRAB_KEY,secKillMsg);
-        // 消息发送MQ成功，该用户被认为是抢到了预购机会 有排队资格
+        CorrelationData correlationData = new CorrelationData();
+        correlationData.setReturnedMessage(new Message(JSONObject.toJSONString(secKillMsg).getBytes(),new MessageProperties()));
+        // 若没有将消息成功发送到交换机 会触发SecKillMsgProducerConfigure自定义的回调方法
+        rabbitTemplate.convertAndSend(RabbitKeys.EXCHANGE_NAME,RabbitKeys.GRAB_KEY,secKillMsg,correlationData);
+        // 此时 先返回客户端 该用户被认为是抢到了预购机会 有排队资格
+        // 在页面轮询查找信息
+        // 若消息发送MQ成功，说明有资格
+        // 若发送MQ失败 则删除预购的key
         redisTemplate.opsForSet().add(PrefixKey.SEC_KILLED_PRE_GRABS.getPrefix(), secKillMsg.getSecKillId() + "@" + secKillMsg.getUserPhone());
         return ResultCode.ENQUEUE_PRE_SECKILL;
     }
@@ -178,7 +187,7 @@ public class SecKillServiceImpl implements SecKillService {
             throw new CustomizeException(ResultCode.END);
         }
         // 模拟MQ消费出错 查看消息队列如何处理
-//        throw new CustomizeException(ResultCode.SERVER_UNKNOWN_ERROR);
+       // throw new CustomizeException(ResultCode.SERVER_UNKNOWN_ERROR);
         // 现在DB中产生数据
         secKillService.doModifySecKillInDB(id,phone);
         // 更新redis中的库存

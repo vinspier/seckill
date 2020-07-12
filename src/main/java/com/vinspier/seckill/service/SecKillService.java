@@ -16,6 +16,9 @@ public interface SecKillService {
     /** 处理 秒抢请求 */
     ResultCode grab(Long id,Long phone,String md5);
 
+    /** 执行异步处理 */
+    ResultCode executeGrabAsync(Long id, Long phone);
+
     /** 在redis中 处理真正的秒杀操作 */
     void doGrabInRedis(SecKillMsg msg);
 
