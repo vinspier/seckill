@@ -12,11 +12,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = {SecKillApplication.class})
 public class SecKillApplicationTest {
 
     private final Logger logger = LoggerFactory.getLogger(SecKillApplicationTest.class);
+
+    private ExecutorService executorService = Executors.newCachedThreadPool();
+    private final CyclicBarrier cyclicBarrier = new CyclicBarrier(50);
 
     @Autowired
     private SecKillService secKillService;
@@ -56,8 +64,34 @@ public class SecKillApplicationTest {
         });
     }
 
-    @Test
     public void grab(long id,long phone,String md5){
         secKillService.grab(id,phone,md5);
+    }
+
+    /**
+     * 模拟抢购接口
+     * cyclicBarrier 当成是nginx的限流
+     * */
+    @Test
+    public void simulationGrab(){
+        for (long i = 0; i < 50; i++){
+            long index = 1776727000 + i;
+            executorService.execute(() -> {
+                try {
+                    logger.info("index={}",index);
+                    cyclicBarrier.await();
+                    secKillService.grab(1000L,index,"f6e12a983a64dd3365f966786a6d5b76");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        try {
+            // 模拟服务器运行中 等待mq 消息处理玩
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        executorService.shutdown();
     }
 }

@@ -48,7 +48,7 @@ public class SecKillMsgProducerConfigure implements RabbitTemplate.ConfirmCallba
         // 若没有成功发送消息到 交换机
         // 认为该用户秒杀失败 删除redis中的预购信息
         Message message = correlationData.getReturnedMessage();
-        if (message != null && message.getBody().length > 0){
+        if (!b && message != null && message.getBody().length > 0){
             String body = new String(correlationData.getReturnedMessage().getBody());
             SecKillMsg secKillMsg = JSONObject.parseObject(body,SecKillMsg.class);
             logger.info("secKillMsg didn't send success to exchange and remove preGrab=[{}@{}] from redis prefixKey=[{}] ",secKillMsg.getSecKillId(),secKillMsg.getUserPhone(),PrefixKey.SEC_KILLED_PRE_GRABS);
