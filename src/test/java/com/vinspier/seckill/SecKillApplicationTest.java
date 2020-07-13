@@ -1,10 +1,12 @@
 package com.vinspier.seckill;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.util.concurrent.RateLimiter;
 import com.vinspier.seckill.config.CustomizeProperties;
 import com.vinspier.seckill.entity.SecKill;
 import com.vinspier.seckill.enums.PayOrderState;
 import com.vinspier.seckill.enums.PrefixKey;
+import com.vinspier.seckill.enums.ResultCode;
 import com.vinspier.seckill.service.PayOrderService;
 import com.vinspier.seckill.service.SecKillService;
 import org.junit.Test;
@@ -14,7 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Random;
 import java.util.concurrent.*;
@@ -35,6 +39,8 @@ public class SecKillApplicationTest {
     private RedisTemplate<String,SecKill> seckillRedisTemplate;
     @Autowired
     private CustomizeProperties customizeProperties;
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Test
     public void findById(){
@@ -125,6 +131,34 @@ public class SecKillApplicationTest {
      * */
     @Test
     public void updateOrderExpiredState(){
-        payOrderService.payExpiredStateSet(PayOrderState.GRAB_SUCCEUSS.getState(),PayOrderState.INVALID.getState(),customizeProperties.getPayedWaited());
+        payOrderService.payExpiredStateSet(PayOrderState.GRAB_SUCCESS.getState(),PayOrderState.INVALID.getState(),customizeProperties.getPayedWaited());
+    }
+
+    /**
+     * 模拟 使用restTemplate 模拟http请求
+     * */
+    @Test
+    public void multiHttpPost(){
+        CountDownLatch countDownLatch = new CountDownLatch(1000);
+        for (long i = 0; i < 1000; i++){
+            long index = 188000000 + i;
+            executorService.execute(() -> {
+                try {
+                    countDownLatch.countDown();
+                    ResponseEntity<String> resultCode = restTemplate.getForEntity("http://localhost:90/secKill/grab/1000/"+ index +"/f6e12a983a64dd3365f966786a6d5b76", String.class);
+                    System.out.println(resultCode);
+                    logger.info("http post @user={} and response info = [{}]",index, resultCode);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        try {
+            // 模拟服务器运行中 等待mq 消息处理玩
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        executorService.shutdown();
     }
 }

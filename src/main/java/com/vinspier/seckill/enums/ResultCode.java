@@ -1,5 +1,8 @@
 package com.vinspier.seckill.enums;
 
+import lombok.ToString;
+
+@ToString
 public enum ResultCode {
 
     /** 秒杀过程的状态 */

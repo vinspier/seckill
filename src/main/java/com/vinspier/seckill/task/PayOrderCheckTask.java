@@ -28,7 +28,7 @@ public class PayOrderCheckTask {
      * */
     @Scheduled(initialDelay =  1000 * 60 * 5,fixedDelay = 1000 * 60 * 15)
     public void payDelayCheck(){
-        payOrderService.payExpiredStateSet(PayOrderState.GRAB_SUCCEUSS.getState(),PayOrderState.INVALID.getState(),customizeProperties.getPayedWaited());
+        payOrderService.payExpiredStateSet(PayOrderState.GRAB_SUCCESS.getState(),PayOrderState.INVALID.getState(),customizeProperties.getPayedWaited());
     }
 
 }
