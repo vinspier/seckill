@@ -74,9 +74,9 @@ customize:
   # 抢到秒杀商品 等待支付时间 单位ms
   payedWaited: 900000
   # 每秒限流数
-  rateLimited: 2
+  rateLimited: 5
   # 获取限流机会等待时间 单位ms
-  rateLimiterWait: 10
+  rateLimiterWait: 500
 
 
 

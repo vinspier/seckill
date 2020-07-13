@@ -17,7 +17,7 @@ public class RateLimiterConfigure {
 
     @Bean
     public RateLimiter rateLimiter(){
-        RateLimiter rateLimiter = RateLimiter.create(customizeProperties.getPayedWaited());
+        RateLimiter rateLimiter = RateLimiter.create(customizeProperties.getRateLimited());
         return rateLimiter;
     }
 
