@@ -15,4 +15,9 @@
             seckill_id = #{secKillId} and version = #{oldVersion}
     </update>
 
+    <!-- 超时未支付订单 重新数量添加到库存中去 -->
+    <update id="addInventoryForExpiredOrder">
+
+    </update>
+
 </mapper>

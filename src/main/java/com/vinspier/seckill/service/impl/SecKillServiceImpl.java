@@ -238,6 +238,11 @@ public class SecKillServiceImpl implements SecKillService {
 
     }
 
+    @Override
+    public int addInventoryForExpiredOrder(long secKillId, int inventory) {
+        return secKillDao.addInventoryForExpiredOrder(secKillId,inventory);
+    }
+
     /**
      * 封装查询出来的秒杀数据
      * */

@@ -34,8 +34,20 @@
         WHERE po.state = #{state}
     </select>
 
-    <!-- 未支付订单的状态设置 -->
-    <update id="payDelayStateSet" >
+    <!-- 查询超时未支付订单的列表 -->
+    <select id="findPayExpiredList" resultType="payOrder">
+        SELECT
+            po.seckill_id,
+            po.user_phone,
+            po.create_time,
+            po.state
+        FROM
+          `pay_order` po
+        WHERE po.state = #{originState} AND AND TIME_TO_SEC(TIMEDIFF(now(), create_time)) >= #{payedWaited}
+    </select>
+
+    <!-- 超时未支付订单的状态设置 -->
+    <update id="payExpiredStateSet" >
         UPDATE pay_order SET state = #{newState} WHERE state = #{originState} AND TIME_TO_SEC(TIMEDIFF(now(), create_time)) >= #{payedWaited}
     </update>
 
