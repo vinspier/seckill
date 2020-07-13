@@ -14,4 +14,11 @@ public interface PayOrderService {
 
     /** 通过状态查询订单信息 */
     List<PayOrder> findListByState(int state);
+
+    /** 未支付订单的状态设置
+     * @Param originState 原始状态
+     * @Param newState 更新后的状态
+     * @Param payedWaited 等待付款的超时时间 单位s
+     * */
+    void payDelayStateSet(int originState,int newState,long payedWaited);
 }

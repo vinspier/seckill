@@ -71,8 +71,8 @@ logging:
 customize:
   # 暴露秒杀商品ID加密的 盐
   exposedSalt: sdfgh%$%hr123thgj@#@@!WSDFD123
-  # 抢到秒杀商品 等待支付时间 单位ms
-  payedWaited: 900000
+  # 抢到秒杀商品 等待支付时间 单位s
+  payedWaited: 900
   # 每秒限流数
   rateLimited: 5
   # 获取限流机会等待时间 单位ms

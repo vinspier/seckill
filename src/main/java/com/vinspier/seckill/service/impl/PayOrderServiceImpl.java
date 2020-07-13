@@ -6,6 +6,7 @@ import com.vinspier.seckill.enums.PayOrderState;
 import com.vinspier.seckill.service.PayOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -34,5 +35,11 @@ public class PayOrderServiceImpl implements PayOrderService {
     @Override
     public List<PayOrder> findListByState(int state) {
         return payOrderDao.findListByState(state);
+    }
+
+    @Override
+    @Transactional
+    public void payDelayStateSet(int originState, int newState,long payedWaited) {
+        payOrderDao.payDelayStateSet(originState,newState,payedWaited);
     }
 }

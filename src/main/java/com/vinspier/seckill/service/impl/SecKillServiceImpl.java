@@ -188,6 +188,11 @@ public class SecKillServiceImpl implements SecKillService {
         }
         // 模拟MQ消费出错 查看消息队列如何处理
        // throw new CustomizeException(ResultCode.SERVER_UNKNOWN_ERROR);
+        /**
+         * 这里 未采用分布式锁
+         * 对于秒杀来说 真实进入到后台的量不大
+         * 采用预知的状态流 和 数据库 提供的行锁 保证数据的一致性
+         * */
         // 现在DB中产生数据
         secKillService.doModifySecKillInDB(id,phone);
         // 更新redis中的库存

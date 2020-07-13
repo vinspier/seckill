@@ -34,4 +34,9 @@
         WHERE po.state = #{state}
     </select>
 
+    <!-- 未支付订单的状态设置 -->
+    <update id="payDelayStateSet" >
+        UPDATE pay_order SET state = #{newState} WHERE state = #{originState} AND TIME_TO_SEC(TIMEDIFF(now(), create_time)) >= #{payedWaited}
+    </update>
+
 </mapper>
