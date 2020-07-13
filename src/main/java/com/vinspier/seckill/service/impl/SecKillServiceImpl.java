@@ -204,7 +204,7 @@ public class SecKillServiceImpl implements SecKillService {
     @Override
     @Transactional
     public void doModifySecKillInDB(Long id,Long phone) {
-        int createNew = payOrderService.createNew(id,phone, PayOrderState.GRAB_SECUSS.getState());
+        int createNew = payOrderService.createNew(id,phone, PayOrderState.GRAB_SUCCEUSS.getState());
         if (createNew <= 0){
             logger.info("sorry,there is only once chance for every one[ secKillId={},phone={} ] ",id,phone);
             throw new CustomizeException(ResultCode.REPEAT_KILL);

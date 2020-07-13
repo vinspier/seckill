@@ -6,18 +6,23 @@
 
     <!-- 使用已知状态以及version 数据库的行锁 更新-->
     <update id="reduceInventory">
-        update
+        UPDATE
           sec_kill
-        set
+        SET
             inventory = inventory - 1,
             version = #{newVersion}
-        where
-            seckill_id = #{secKillId} and version = #{oldVersion}
+        WHERE
+            seckill_id = #{secKillId} AND version = #{oldVersion}
     </update>
 
     <!-- 超时未支付订单 重新数量添加到库存中去 -->
     <update id="addInventoryForExpiredOrder">
-
+        UPDATE
+          sec_kill
+        SET
+            inventory = inventory + #{inventory}
+        WHERE
+            seckill_id = #{secKillId}
     </update>
 
 </mapper>

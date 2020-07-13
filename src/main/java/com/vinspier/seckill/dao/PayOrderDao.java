@@ -27,4 +27,9 @@ public interface PayOrderDao extends Mapper<PayOrder> {
      * @Param payedWaited 等待付款的超时时间 单位s
      * */
     void payExpiredStateSet(@Param("originState")int originState,@Param("newState")int newState,@Param("payedWaited")long payedWaited);
+
+    /**
+     * 批量更新订单状态
+     * */
+    void batchUpdateState(@Param("payOrderList") List<PayOrder> payOrderList);
 }

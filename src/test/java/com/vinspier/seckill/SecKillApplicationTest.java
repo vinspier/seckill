@@ -1,8 +1,11 @@
 package com.vinspier.seckill;
 
 import com.google.common.util.concurrent.RateLimiter;
+import com.vinspier.seckill.config.CustomizeProperties;
 import com.vinspier.seckill.entity.SecKill;
+import com.vinspier.seckill.enums.PayOrderState;
 import com.vinspier.seckill.enums.PrefixKey;
+import com.vinspier.seckill.service.PayOrderService;
 import com.vinspier.seckill.service.SecKillService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +30,11 @@ public class SecKillApplicationTest {
     @Autowired
     private SecKillService secKillService;
     @Autowired
+    private PayOrderService payOrderService;
+    @Autowired
     private RedisTemplate<String,SecKill> seckillRedisTemplate;
+    @Autowired
+    private CustomizeProperties customizeProperties;
 
     @Test
     public void findById(){
@@ -111,5 +118,13 @@ public class SecKillApplicationTest {
             e.printStackTrace();
         }
         executorService.shutdown();
+    }
+
+    /**
+     * 测试更新 超时未支付订单状态
+     * */
+    @Test
+    public void updateOrderExpiredState(){
+        payOrderService.payExpiredStateSet(PayOrderState.GRAB_SUCCEUSS.getState(),PayOrderState.INVALID.getState(),customizeProperties.getPayedWaited());
     }
 }

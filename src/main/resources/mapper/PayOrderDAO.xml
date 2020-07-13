@@ -4,19 +4,31 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.vinspier.seckill.dao.PayOrderDao">
 
+    <sql id="fieldAsProperty">
+        seckill_id AS seckillId,
+        user_phone AS userPhone,
+        create_time AS createTime,
+        state AS state
+    </sql>
+
+    <sql id="fieldAsPropertyWithSecKill">
+        seckill_id AS seckillId,
+        user_phone AS userPhone,
+        create_time AS createTime,
+        state AS state,
+        sk.seckill_id "seckill.seckillId",
+        sk.name "seckill.name",
+        sk.inventory "seckill.inventory",
+        sk.start_time "seckill.startTime",
+        sk.end_time "seckill.endTime",
+        sk.create_time "seckill.createTime",
+        sk.version "seckill.version"
+    </sql>
+
     <!-- 查询秒杀订单信息 携带商品信息 -->
     <select id="findBySecKillIdWithSecKill" resultType="payOrder">
         SELECT
-            po.seckill_id,
-            po.user_phone,
-            po.create_time,
-            po.state,
-            sk.seckill_id "seckill.seckill_id",
-            sk.name "seckill.name",
-            sk.inventory "seckill.inventory",
-            sk.start_time "seckill.start_time",
-            sk.end_time "seckill.end_time",
-            sk.create_time "seckill.create_time"
+          <include refid="fieldAsPropertyWithSecKill"></include>
         FROM
             `pay_order` po INNER JOIN `sec_kill` sk ON po.seckill_id = sk.seckill_id
         WHERE po.seckill_id = #{secKillId} AND po.user_phone = #{phone}
@@ -25,10 +37,7 @@
     <!-- 通过状态查询订单信息 -->
     <select id="findListByState" resultType="payOrder">
         SELECT
-            po.seckill_id,
-            po.user_phone,
-            po.create_time,
-            po.state
+          <include refid="fieldAsProperty"></include>
         FROM
           `pay_order` po
         WHERE po.state = #{state}
@@ -37,18 +46,33 @@
     <!-- 查询超时未支付订单的列表 -->
     <select id="findPayExpiredList" resultType="payOrder">
         SELECT
-            po.seckill_id,
-            po.user_phone,
-            po.create_time,
-            po.state
+          <include refid="fieldAsProperty"></include>
         FROM
           `pay_order` po
-        WHERE po.state = #{originState} AND AND TIME_TO_SEC(TIMEDIFF(now(), create_time)) >= #{payedWaited}
+        WHERE po.state = #{originState} AND TIME_TO_SEC(TIMEDIFF(now(), create_time)) >= #{payedWaited}
     </select>
 
-    <!-- 超时未支付订单的状态设置 -->
+    <!-- 统一超时未支付订单的状态设置 -->
     <update id="payExpiredStateSet" >
         UPDATE pay_order SET state = #{newState} WHERE state = #{originState} AND TIME_TO_SEC(TIMEDIFF(now(), create_time)) >= #{payedWaited}
     </update>
 
+    <!-- 批量更新订单状态 应该使用主键ID -->
+    <update id="batchUpdateState" parameterType="java.util.List">
+        UPDATE
+          pay_order
+        SET
+          state =
+        <foreach collection="payOrderList" item="o" separator=" " open="case" close="end" index="index">
+          WHEN seckill_id = #{o.seckillId} AND user_phone = #{o.userPhone} THEN #{o.state}
+        </foreach>
+        WHERE seckill_id IN
+        <foreach collection="payOrderList" item="o" separator="," open="(" close=")" index="index">
+          #{o.seckillId}
+        </foreach>
+        AND user_phone IN
+        <foreach collection="payOrderList" item="o" separator="," open="(" close=")" index="index">
+            #{o.userPhone}
+        </foreach>
+    </update>
 </mapper>
