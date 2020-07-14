@@ -144,8 +144,6 @@ public class SecKillServiceImpl implements SecKillService {
         secKillMsg.setUserPhone(phone);
         CorrelationData correlationData = new CorrelationData();
         correlationData.setReturnedMessage(new Message(JSONObject.toJSONString(secKillMsg).getBytes(),new MessageProperties()));
-        // 若没有将消息成功发送到交换机 会触发SecKillMsgProducerConfigure自定义的回调方法
-        rabbitTemplate.convertAndSend(RabbitKeys.EXCHANGE_NAME,RabbitKeys.GRAB_KEY,secKillMsg,correlationData);
         // 此时 先返回客户端 该用户被认为是抢到了预购机会 有排队资格
         // 在页面轮询查找信息
         // 若消息发送MQ成功，说明有资格
@@ -153,6 +151,8 @@ public class SecKillServiceImpl implements SecKillService {
         // 更新redis中的库存
         redisTemplate.opsForValue().decrement(PrefixKey.SEC_KILLED_INVENTORY.getPrefix() + id);
         redisTemplate.opsForSet().add(PrefixKey.SEC_KILLED_PRE_GRABS.getPrefix(), secKillMsg.getSecKillId() + "@" + secKillMsg.getUserPhone());
+        // 若没有将消息成功发送到交换机 会触发SecKillMsgProducerConfigure自定义的回调方法
+        rabbitTemplate.convertAndSend(RabbitKeys.EXCHANGE_NAME,RabbitKeys.GRAB_KEY,secKillMsg,correlationData);
         return ResultCode.ENQUEUE_PRE_SECKILL;
     }
 
