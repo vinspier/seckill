@@ -12,7 +12,7 @@
             inventory = inventory - 1,
             version = #{newVersion}
         WHERE
-            seckill_id = #{secKillId} AND version = #{oldVersion}
+            seckill_id = #{secKillId} AND version = #{oldVersion} AND inventory > 0
     </update>
 
     <!-- 超时未支付订单 重新数量添加到库存中去 -->

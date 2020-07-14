@@ -161,4 +161,34 @@ public class SecKillApplicationTest {
         }
         executorService.shutdown();
     }
+
+    /**
+     * 使用nginx限流测试
+     * http://seckill.vinspier.com/
+     * */
+    @Test
+    public void multiHttpPostNginxLimited(){
+        CountDownLatch countDownLatch = new CountDownLatch(100);
+        for (long i = 0; i < 100; i++){
+            long index = 1000000 + i;
+            executorService.execute(() -> {
+                try {
+                    countDownLatch.countDown();
+                    /** 若被nginx拒绝请求 跳转到 配置错误页面 */
+                    ResponseEntity<String> resultCode = restTemplate.getForEntity("http://seckill.vinspier.com/secKill/grab/1000/"+ index +"/f6e12a983a64dd3365f966786a6d5b76", String.class);
+                    System.out.println(resultCode);
+                    logger.info("http post @user={} and response info = [{}]",index, resultCode);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        try {
+            // 模拟服务器运行中 等待mq 消息处理玩
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        executorService.shutdown();
+    }
 }
