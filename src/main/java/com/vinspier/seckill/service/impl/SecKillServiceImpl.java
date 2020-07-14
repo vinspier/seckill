@@ -150,6 +150,8 @@ public class SecKillServiceImpl implements SecKillService {
         // 在页面轮询查找信息
         // 若消息发送MQ成功，说明有资格
         // 若发送MQ失败 则删除预购的key
+        // 更新redis中的库存
+        redisTemplate.opsForValue().decrement(PrefixKey.SEC_KILLED_INVENTORY.getPrefix() + id);
         redisTemplate.opsForSet().add(PrefixKey.SEC_KILLED_PRE_GRABS.getPrefix(), secKillMsg.getSecKillId() + "@" + secKillMsg.getUserPhone());
         return ResultCode.ENQUEUE_PRE_SECKILL;
     }
@@ -195,8 +197,6 @@ public class SecKillServiceImpl implements SecKillService {
          * */
         // 现在DB中产生数据
         secKillService.doModifySecKillInDB(id,phone);
-        // 更新redis中的库存
-        redisTemplate.opsForValue().decrement(PrefixKey.SEC_KILLED_INVENTORY.getPrefix() + id);
         // 添加用户到 抢到秒杀的集合key中
         redisTemplate.opsForSet().add(PrefixKey.SEC_KILLED_BOUGHT_USERS.getPrefix() + id,phone);
     }
@@ -230,7 +230,7 @@ public class SecKillServiceImpl implements SecKillService {
         if (redisTemplate.opsForSet().isMember(PrefixKey.SEC_KILLED_BOUGHT_USERS.getPrefix() + id,phone)){
             return SecKillState.SUCCESS;
         }else{
-            if (redisTemplate.opsForSet().isMember(PrefixKey.SEC_KILLED_PRE_GRABS,id + "@" + phone)){
+            if (redisTemplate.opsForSet().isMember(PrefixKey.SEC_KILLED_PRE_GRABS.getPrefix(),id + "@" + phone)){
                 return SecKillState.QUEUE;
             }
             return SecKillState.FAILED;

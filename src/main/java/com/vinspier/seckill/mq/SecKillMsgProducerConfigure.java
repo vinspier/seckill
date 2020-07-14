@@ -52,6 +52,8 @@ public class SecKillMsgProducerConfigure implements RabbitTemplate.ConfirmCallba
             String body = new String(correlationData.getReturnedMessage().getBody());
             SecKillMsg secKillMsg = JSONObject.parseObject(body,SecKillMsg.class);
             logger.info("secKillMsg didn't send success to exchange and remove preGrab=[{}@{}] from redis prefixKey=[{}] ",secKillMsg.getSecKillId(),secKillMsg.getUserPhone(),PrefixKey.SEC_KILLED_PRE_GRABS);
+            // redis库存 加回1
+            redisTemplate.opsForValue().increment(PrefixKey.SEC_KILLED_INVENTORY.getPrefix() + secKillMsg.getSecKillId());
             // 删除redis中 排队中的用户
             redisTemplate.opsForSet().remove(PrefixKey.SEC_KILLED_PRE_GRABS.getPrefix(),secKillMsg.getSecKillId() + "@" + secKillMsg.getUserPhone());
         }
