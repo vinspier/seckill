@@ -1,7 +1,5 @@
 package com.vinspier.seckill.config;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vinspier.seckill.entity.SecKill;
 import org.springframework.context.annotation.Bean;
