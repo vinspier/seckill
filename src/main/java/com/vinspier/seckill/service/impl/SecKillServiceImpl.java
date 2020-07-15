@@ -194,6 +194,8 @@ public class SecKillServiceImpl implements SecKillService {
          * 这里 未采用分布式锁
          * 对于秒杀来说 真实进入到后台的量不大
          * 采用预知的状态流 和 数据库 提供的行锁 保证数据的一致性
+         *
+         * 提供了 redission的分布式锁
          * */
         // 现在DB中产生数据
         secKillService.doModifySecKillInDB(id,phone);
