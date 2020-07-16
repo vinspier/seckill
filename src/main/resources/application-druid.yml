@@ -49,7 +49,7 @@ spring:
 #zookeeper配置
 zookeeper:
   # 锁根节点
-  lock-root: sec_kill_lock
+  lock-root: /sec_kill_lock
   # 每次重试时间间隔，单位毫秒
   base-sleep-time: 1000
   # 重试次数
@@ -57,9 +57,9 @@ zookeeper:
   # zookeeper服务连接id与端口
   connect-str: 127.0.0.1:2181
   # 会话超时时间，单位毫秒
-  session-timeout: 5000
+  session-timeout: 60000
   # 连接创建超时时间，单位毫秒
-  connection-timeout: 5000
+  connection-timeout: 15000
   # 获取锁等待时间，单位毫秒
   lock-acquire-timeout: 1000
 

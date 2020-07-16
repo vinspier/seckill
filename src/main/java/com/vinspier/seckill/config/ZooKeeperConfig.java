@@ -26,8 +26,7 @@ public class ZooKeeperConfig {
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(zooKeeperProperties.getBaseSleepTime(), zooKeeperProperties.getMaxRetries());
 
         //构建 CuratorFramework
-        CuratorFramework curatorFramework =
-                CuratorFrameworkFactory.builder()
+        CuratorFramework curatorFramework = CuratorFrameworkFactory.builder()
                         .connectString(zooKeeperProperties.getConnectStr())
                         .sessionTimeoutMs(zooKeeperProperties.getSessionTimeout())
                         .connectionTimeoutMs(zooKeeperProperties.getConnectTimeout())
