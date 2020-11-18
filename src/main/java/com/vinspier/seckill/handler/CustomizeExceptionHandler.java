@@ -33,6 +33,17 @@ public class CustomizeExceptionHandler {
     }
 
     /**
+     * 处理程序抛出的非自定义异常
+     * 使用建造者模式的全局返回对象
+     * */
+    @ExceptionHandler(value = Exception.class)
+    @ResponseBody
+    public String handleException1(Exception e){
+        logger.error(e.getMessage(),e);
+        return JSONObject.toJSONString(BaseResult.error(ResultCode.SERVER_UNKNOWN_ERROR));
+    }
+
+    /**
      * 处理程序抛出的非自定义的CustomizeException异常
      * */
     @ExceptionHandler(value = CustomizeException.class)
@@ -40,6 +51,16 @@ public class CustomizeExceptionHandler {
     public String handleUserException(CustomizeException e){
         logger.error(e.getMessage(),e);
         return JSONObject.toJSONString(CustomizeResponse.failed(e.getResultCode()));
+    }
+
+    /**
+     * 处理程序抛出的非自定义的CustomizeException异常
+     * */
+    @ExceptionHandler(value = CustomizeException.class)
+    @ResponseBody
+    public String handleUserException1(CustomizeException e){
+        logger.error(e.getMessage(),e);
+        return JSONObject.toJSONString(BaseResult.error(e.getResultCode()));
     }
 
 }
